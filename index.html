@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Title</title>
+    <meta name="description" content="HTML Page">
+    <meta name="author" content="Me">
+
+    <link rel="stylesheet" href="node_modules/noodel/dist/noodel.min.css">
+    <script src="node_modules/noodel/dist/noodel-full.umd.js"></script>
+    <script src="dist/noodel-search.umd.js"></script>
+</head>
+
+<body>
+    <style>
+        .accent {
+            background-color: aquamarine;
+        }
+    </style>
+    <div id="root"></div>
+    <input id="search" type="text"></input>
+    <button id="prev">Prev</button>
+    <button id="next">Next</button>
+    <button id="clear">Clear</button>
+    <script>
+        let noodel = new Noodel([
+            {
+                content: "aa bb cc dd ee ff"
+            },
+            {
+                content: "a b c d e f"
+            },
+            {
+                content: "<p>a bb c dd e ff FFFFF GG</p>",
+                children: [{
+                    content: "<div>a bb c d<b>d e f</b>f FFFFF GG</div>",
+                }]
+            }
+        ]);
+
+        let search = new NoodelSearch(noodel, "accent");
+
+        document.getElementById("prev").addEventListener("click", () => {
+            search.prev();
+        });
+
+        document.getElementById("next").addEventListener("click", () => {
+            search.next();
+        });
+
+        document.getElementById("clear").addEventListener("click", () => {
+            search.clear();
+        });
+
+        document.getElementById("search").addEventListener("input", (ev) => {
+            search.search(ev.target.value, { separateWordSearch: false }, function () {
+                search.next();
+            });
+        });
+
+        noodel.mount("#root");
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "CommonJS",
+        "strict": false,
+        "noImplicitThis": true,
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "declaration": true,
+        "declarationDir": "typings"
+    },
+    "include": [
+        "*.ts",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
