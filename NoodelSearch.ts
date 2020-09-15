@@ -5,10 +5,10 @@ import Noode from 'noodel/typings/main/Noode';
 export default class NoodelSearch {
 
     private noodel: Noodel;
-    private results: {noode: Noode, markInstance, marks: HTMLSpanElement[]}[] = [];
-    private currentNoodeIndex: number = null;
-    private currentMarkIndex: number = null;
-    private currentGlobalMarkIndex: number = null;
+    private results: { noode: Noode, markInstance, marks: HTMLSpanElement[] }[] = [];
+    private noodeIndex: number = null;
+    private markIndex: number = null;
+    private globalMarkIndex: number = null;
     private markCount = 0;
     private focalMarkClass: string = null;
 
@@ -22,13 +22,6 @@ export default class NoodelSearch {
         if (focalMarkClass) this.focalMarkClass = focalMarkClass;
     }
 
-    private traverseNoodel(parent: Noode, func: (noode: Noode) => any) {
-        parent.getChildren().forEach(child => {
-            func(child);
-            this.traverseNoodel(child, func);
-        });
-    }
-
     /**
      * Performs a search on the DOM content of every noode and highlights the results
      * (creates a mark for each occurrence of the search string). 
@@ -39,17 +32,14 @@ export default class NoodelSearch {
      */
     search(searchString: string, options?: object, cb?: () => any) {
         this.clear(() => {
-            let allNoodes: Noode[] = [];
-            
-            this.traverseNoodel(this.noodel.getRoot(), noode => allNoodes.push(noode));
-            let noodeCount = allNoodes.length;
+            let noodeCount = this.noodel.getNoodeCount();
 
-            if (allNoodes.length === 0) {
+            if (noodeCount === 0) {
                 if (typeof cb === 'function') cb();
                 return;
             }
 
-            allNoodes.forEach(noode => {
+            this.noodel.getRoot().traverseSubtree(noode => {
                 const el = noode.getEl();
 
                 if (!el) {
@@ -87,14 +77,14 @@ export default class NoodelSearch {
                         }
                     }
                 });
-            });
+            }, false);
         });
     }
 
     /**
      * Returns the current set of search results as an array of noodes with an array of marks in each.
      */
-    getResults(): {noode: Noode, marks: HTMLSpanElement[]}[] {
+    getResults(): { noode: Noode, marks: HTMLElement[] }[] {
         return this.results;
     }
 
@@ -102,8 +92,8 @@ export default class NoodelSearch {
      * Gets the DOM element of the current focal mark.
      */
     getFocalMark(): HTMLElement {
-        if (this.currentGlobalMarkIndex === null) return null;
-        return this.results[this.currentNoodeIndex].marks[this.currentMarkIndex];
+        if (this.globalMarkIndex === null) return null;
+        return this.results[this.noodeIndex].marks[this.markIndex];
     }
 
     /**
@@ -112,9 +102,9 @@ export default class NoodelSearch {
      */
     getFocalMarkPosition(): { noodeIndex: number, markIndex: number, globalMarkIndex: number } {
         return {
-            noodeIndex: this.currentNoodeIndex,
-            markIndex: this.currentMarkIndex,
-            globalMarkIndex: this.currentGlobalMarkIndex
+            noodeIndex: this.noodeIndex,
+            markIndex: this.markIndex,
+            globalMarkIndex: this.globalMarkIndex
         };
     }
 
@@ -126,87 +116,89 @@ export default class NoodelSearch {
     }
 
     /**
-     * Change focus to the next mark. If crosses a noode boundary, will trigger a jump to the new noode.
+     * Change focus to the next mark. Will jump to the noode containing the mark if it's not already in focus.
      */
     next() {
         if (this.results.length === 0) {
             return;
         }
 
-        if (this.currentGlobalMarkIndex === null) {
-            this.currentGlobalMarkIndex = 0;
-            this.currentNoodeIndex = 0;
-            this.currentMarkIndex = 0;
+        if (this.globalMarkIndex === null) {
+            this.globalMarkIndex = 0;
+            this.noodeIndex = 0;
+            this.markIndex = 0;
             this.results[0].noode.jumpToFocus();
             if (this.focalMarkClass) this.results[0].marks[0].classList.add(this.focalMarkClass);
         }
         else {
-            let currentMarks = this.results[this.currentNoodeIndex].marks;
+            let currentMarks = this.results[this.noodeIndex].marks;
 
-            currentMarks[this.currentMarkIndex].classList.remove(this.focalMarkClass);
+            currentMarks[this.markIndex].classList.remove(this.focalMarkClass);
 
-            if (this.currentMarkIndex === currentMarks.length - 1) {
-                if (this.currentNoodeIndex === this.results.length - 1) {
-                    this.currentNoodeIndex = 0;
-                    this.currentGlobalMarkIndex = 0;
+            if (this.markIndex === currentMarks.length - 1) {
+                if (this.noodeIndex === this.results.length - 1) {
+                    this.noodeIndex = 0;
+                    this.globalMarkIndex = 0;
                 }
                 else {
-                    this.currentNoodeIndex++;
-                    this.currentGlobalMarkIndex++;
+                    this.noodeIndex++;
+                    this.globalMarkIndex++;
                 }
 
-                this.currentMarkIndex = 0;
+                this.markIndex = 0;
 
-                this.results[this.currentNoodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) this.results[this.currentNoodeIndex].marks[this.currentMarkIndex].classList.add(this.focalMarkClass);
+                this.results[this.noodeIndex].noode.jumpToFocus();
+                if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
             }
             else {
-                this.currentMarkIndex++;
-                this.currentGlobalMarkIndex++;
-                if (this.focalMarkClass) currentMarks[this.currentMarkIndex].classList.add(this.focalMarkClass);
+                this.markIndex++;
+                this.globalMarkIndex++;
+                this.results[this.noodeIndex].noode.jumpToFocus();
+                if (this.focalMarkClass) currentMarks[this.markIndex].classList.add(this.focalMarkClass);
             }
         }
     }
 
     /**
-     * Change focus to the previous mark. If crosses a noode boundary, will trigger a jump to the new noode.
+     * Change focus to the previous mark. Will jump to the noode containing the mark if it's not already in focus.
      */
     prev() {
         if (this.results.length === 0) {
             return;
         }
 
-        if (this.currentGlobalMarkIndex === null) {
-            this.currentGlobalMarkIndex = this.markCount - 1;
-            this.currentNoodeIndex = this.results.length - 1;
-            this.currentMarkIndex = this.results[this.currentNoodeIndex].marks.length - 1;
-            this.results[this.currentNoodeIndex].noode.jumpToFocus();
-            if (this.focalMarkClass) this.results[this.currentNoodeIndex].marks[this.currentMarkIndex].classList.add(this.focalMarkClass);
+        if (this.globalMarkIndex === null) {
+            this.globalMarkIndex = this.markCount - 1;
+            this.noodeIndex = this.results.length - 1;
+            this.markIndex = this.results[this.noodeIndex].marks.length - 1;
+            this.results[this.noodeIndex].noode.jumpToFocus();
+            if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
         }
         else {
-            let currentMarks = this.results[this.currentNoodeIndex].marks;
+            let currentMarks = this.results[this.noodeIndex].marks;
 
-            currentMarks[this.currentMarkIndex].classList.remove(this.focalMarkClass);
+            currentMarks[this.markIndex].classList.remove(this.focalMarkClass);
 
-            if (this.currentMarkIndex === 0) {
-                if (this.currentNoodeIndex === 0) {
-                    this.currentNoodeIndex = this.results.length - 1;
-                    this.currentGlobalMarkIndex = this.markCount - 1;
+            if (this.markIndex === 0) {
+                if (this.noodeIndex === 0) {
+                    this.noodeIndex = this.results.length - 1;
+                    this.globalMarkIndex = this.markCount - 1;
                 }
                 else {
-                    this.currentNoodeIndex--;
-                    this.currentGlobalMarkIndex--;
+                    this.noodeIndex--;
+                    this.globalMarkIndex--;
                 }
 
-                this.currentMarkIndex = this.results[this.currentNoodeIndex].marks.length - 1;
+                this.markIndex = this.results[this.noodeIndex].marks.length - 1;
 
-                this.results[this.currentNoodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) this.results[this.currentNoodeIndex].marks[this.currentMarkIndex].classList.add(this.focalMarkClass);
+                this.results[this.noodeIndex].noode.jumpToFocus();
+                if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
             }
             else {
-                this.currentMarkIndex--;
-                this.currentGlobalMarkIndex--;
-                if (this.focalMarkClass) currentMarks[this.currentMarkIndex].classList.add(this.focalMarkClass);
+                this.markIndex--;
+                this.globalMarkIndex--;
+                this.results[this.noodeIndex].noode.jumpToFocus();
+                if (this.focalMarkClass) currentMarks[this.markIndex].classList.add(this.focalMarkClass);
             }
         }
     }
@@ -216,9 +208,9 @@ export default class NoodelSearch {
      * @param cb callback after clear complete
      */
     clear(cb?: () => any) {
-        this.currentMarkIndex = null;
-        this.currentNoodeIndex = null;
-        this.currentGlobalMarkIndex = null;
+        this.markIndex = null;
+        this.noodeIndex = null;
+        this.globalMarkIndex = null;
         this.markCount = 0;
 
         if (this.results.length === 0) {

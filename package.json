@@ -1,34 +1,38 @@
 {
-  "name": "noodel-search",
-  "version": "0.1.0",
-  "description": "Simple text search plugin for Noodel.js",
-  "main": "dist/noodel-search.umd.js",
-  "scripts": {
-    "build": "rimraf dist && rimraf typings && webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zlu883/noodel-search.git"
-  },
-  "author": "Zuohao (Jonny) Lu",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/zlu883/noodel-search/issues"
-  },
-  "homepage": "https://github.com/zlu883/noodel-search#readme",
-  "dependencies": {
-    "mark.js": "^8.11.1"
-  },
-  "devDependencies": {
-    "noodel": "^2.1.0",
-    "rimraf": "^3.0.2",
-    "ts-loader": "^8.0.3",
-    "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
-  },
-  "peerDependencies": {
-    "noodel": "^2.1.0"
-  }
+    "name": "noodel-search",
+    "version": "0.1.0",
+    "description": "Simple text search plugin for Noodel.js",
+    "main": "dist/noodel-search.umd.js",
+    "scripts": {
+        "build": "rimraf dist && rimraf typings && webpack",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zlu883/noodel-search.git"
+    },
+    "author": "Zuohao (Jonny) Lu",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/zlu883/noodel-search/issues"
+    },
+    "homepage": "https://github.com/zlu883/noodel-search",
+    "files": [
+        "dist",
+        "typings"
+    ],
+    "dependencies": {
+        "mark.js": "^8.11.1"
+    },
+    "devDependencies": {
+        "noodel": "^2.2.0",
+        "rimraf": "^3.0.2",
+        "ts-loader": "^8.0.3",
+        "typescript": "^4.0.2",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12"
+    },
+    "peerDependencies": {
+        "noodel": "^2.2.0"
+    }
 }
