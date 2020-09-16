@@ -1,6 +1,6 @@
 {
     "name": "noodel-search",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Simple text search plugin for Noodel.js",
     "main": "dist/noodel-search.umd.js",
     "scripts": {
