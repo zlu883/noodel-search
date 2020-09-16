@@ -5,7 +5,7 @@ import Noode from 'noodel/typings/main/Noode';
 export default class NoodelSearch {
 
     private noodel: Noodel;
-    private results: { noode: Noode, markInstance, marks: HTMLSpanElement[] }[] = [];
+    private results: { noode: Noode, markInstance, marks: HTMLElement[] }[] = [];
     private noodeIndex: number = null;
     private markIndex: number = null;
     private globalMarkIndex: number = null;
@@ -20,6 +20,18 @@ export default class NoodelSearch {
     constructor(noodel: Noodel, focalMarkClass?: string) {
         this.noodel = noodel;
         if (focalMarkClass) this.focalMarkClass = focalMarkClass;
+    }
+
+    private jumpToFocalMark() {
+        let current = this.results[this.noodeIndex];
+        let currentMark = current.marks[this.markIndex];
+
+        current.noode.jumpToFocus();
+        if (this.focalMarkClass) currentMark.classList.add(this.focalMarkClass);
+
+        this.noodel.nextTick(() => {
+            currentMark.scrollIntoView({block: "center"});
+        });
     }
 
     /**
@@ -127,8 +139,6 @@ export default class NoodelSearch {
             this.globalMarkIndex = 0;
             this.noodeIndex = 0;
             this.markIndex = 0;
-            this.results[0].noode.jumpToFocus();
-            if (this.focalMarkClass) this.results[0].marks[0].classList.add(this.focalMarkClass);
         }
         else {
             let currentMarks = this.results[this.noodeIndex].marks;
@@ -146,17 +156,14 @@ export default class NoodelSearch {
                 }
 
                 this.markIndex = 0;
-
-                this.results[this.noodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
             }
             else {
                 this.markIndex++;
                 this.globalMarkIndex++;
-                this.results[this.noodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) currentMarks[this.markIndex].classList.add(this.focalMarkClass);
             }
         }
+
+        this.jumpToFocalMark();
     }
 
     /**
@@ -171,8 +178,6 @@ export default class NoodelSearch {
             this.globalMarkIndex = this.markCount - 1;
             this.noodeIndex = this.results.length - 1;
             this.markIndex = this.results[this.noodeIndex].marks.length - 1;
-            this.results[this.noodeIndex].noode.jumpToFocus();
-            if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
         }
         else {
             let currentMarks = this.results[this.noodeIndex].marks;
@@ -190,17 +195,14 @@ export default class NoodelSearch {
                 }
 
                 this.markIndex = this.results[this.noodeIndex].marks.length - 1;
-
-                this.results[this.noodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) this.results[this.noodeIndex].marks[this.markIndex].classList.add(this.focalMarkClass);
             }
             else {
                 this.markIndex--;
                 this.globalMarkIndex--;
-                this.results[this.noodeIndex].noode.jumpToFocus();
-                if (this.focalMarkClass) currentMarks[this.markIndex].classList.add(this.focalMarkClass);
             }
         }
+
+        this.jumpToFocalMark();
     }
 
     /**
