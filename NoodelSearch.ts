@@ -28,10 +28,6 @@ export default class NoodelSearch {
 
         current.noode.jumpToFocus();
         if (this.focalMarkClass) currentMark.classList.add(this.focalMarkClass);
-
-        this.noodel.nextTick(() => {
-            currentMark.scrollIntoView({block: "center"});
-        });
     }
 
     /**
