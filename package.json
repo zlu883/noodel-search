@@ -1,6 +1,6 @@
 {
     "name": "noodel-search",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "Simple text search plugin for Noodel.js",
     "main": "dist/noodel-search.umd.js",
     "scripts": {
@@ -25,7 +25,7 @@
         "mark.js": "^8.11.1"
     },
     "devDependencies": {
-        "noodel": "^2.2.0",
+        "noodel": "^3.0.0",
         "rimraf": "^3.0.2",
         "ts-loader": "^8.0.3",
         "typescript": "^4.0.2",

@@ -1,12 +1,12 @@
 import Noodel from 'noodel';
 import Mark from 'mark.js';
-import Noode from 'noodel/typings/main/Noode';
+import NoodelNode from 'noodel/typings/main/NoodelNode';
 
 export default class NoodelSearch {
 
     private noodel: Noodel;
-    private results: { noode: Noode, markInstance, marks: HTMLElement[] }[] = [];
-    private noodeIndex: number = null;
+    private results: { node: NoodelNode, markInstance, marks: HTMLElement[] }[] = [];
+    private nodeIndex: number = null;
     private markIndex: number = null;
     private globalMarkIndex: number = null;
     private markCount = 0;
@@ -23,15 +23,15 @@ export default class NoodelSearch {
     }
 
     private jumpToFocalMark() {
-        let current = this.results[this.noodeIndex];
+        let current = this.results[this.nodeIndex];
         let currentMark = current.marks[this.markIndex];
 
-        current.noode.jumpToFocus();
+        current.node.jumpToFocus();
         if (this.focalMarkClass) currentMark.classList.add(this.focalMarkClass);
     }
 
     /**
-     * Performs a search on the DOM content of every noode and highlights the results
+     * Performs a search on the DOM content of every node and highlights the results
      * (creates a mark for each occurrence of the search string). 
      * The search may be asynchronous so result queries should be placed in the callback.
      * @param searchString string to search for
@@ -40,20 +40,20 @@ export default class NoodelSearch {
      */
     search(searchString: string, options?: object, cb?: () => any) {
         this.clear(() => {
-            let noodeCount = this.noodel.getNoodeCount();
+            let nodeCount = this.noodel.getNodeCount();
 
-            if (noodeCount === 0) {
+            if (nodeCount === 0) {
                 if (typeof cb === 'function') cb();
                 return;
             }
 
-            this.noodel.getRoot().traverseSubtree(noode => {
-                const el = noode.getEl();
+            this.noodel.getRoot().traverseSubtree(node => {
+                const el = node.getEl();
 
                 if (!el) {
-                    noodeCount--;
+                    nodeCount--;
 
-                    if (noodeCount === 0) {
+                    if (nodeCount === 0) {
                         if (typeof cb === 'function') cb();
                     }
 
@@ -71,16 +71,16 @@ export default class NoodelSearch {
                     done: () => {
                         if (marks.length > 0) {
                             this.results.push({
-                                noode,
+                                node,
                                 marks,
                                 markInstance
                             });
                             this.markCount += marks.length;
                         }
 
-                        noodeCount--;
+                        nodeCount--;
 
-                        if (noodeCount === 0) {
+                        if (nodeCount === 0) {
                             if (typeof cb === 'function') cb();
                         }
                     }
@@ -90,9 +90,9 @@ export default class NoodelSearch {
     }
 
     /**
-     * Returns the current set of search results as an array of noodes with an array of marks in each.
+     * Returns the current set of search results as an array of nodes with an array of marks in each.
      */
-    getResults(): { noode: Noode, marks: HTMLElement[] }[] {
+    getResults(): { node: NoodelNode, marks: HTMLElement[] }[] {
         return this.results;
     }
 
@@ -101,16 +101,16 @@ export default class NoodelSearch {
      */
     getFocalMark(): HTMLElement {
         if (this.globalMarkIndex === null) return null;
-        return this.results[this.noodeIndex].marks[this.markIndex];
+        return this.results[this.nodeIndex].marks[this.markIndex];
     }
 
     /**
-     * Gets the position of the focal mark. Returns an object containing the noode index,
-     * local mark index within the noode and the global mark index.
+     * Gets the position of the focal mark. Returns an object containing the node index,
+     * local mark index within the node and the global mark index.
      */
-    getFocalMarkPosition(): { noodeIndex: number, markIndex: number, globalMarkIndex: number } {
+    getFocalMarkPosition(): { nodeIndex: number, markIndex: number, globalMarkIndex: number } {
         return {
-            noodeIndex: this.noodeIndex,
+            nodeIndex: this.nodeIndex,
             markIndex: this.markIndex,
             globalMarkIndex: this.globalMarkIndex
         };
@@ -124,7 +124,7 @@ export default class NoodelSearch {
     }
 
     /**
-     * Change focus to the next mark. Will jump to the noode containing the mark if it's not already in focus.
+     * Change focus to the next mark. Will jump to the node containing the mark if it's not already in focus.
      */
     next() {
         if (this.results.length === 0) {
@@ -133,21 +133,21 @@ export default class NoodelSearch {
 
         if (this.globalMarkIndex === null) {
             this.globalMarkIndex = 0;
-            this.noodeIndex = 0;
+            this.nodeIndex = 0;
             this.markIndex = 0;
         }
         else {
-            let currentMarks = this.results[this.noodeIndex].marks;
+            let currentMarks = this.results[this.nodeIndex].marks;
 
             currentMarks[this.markIndex].classList.remove(this.focalMarkClass);
 
             if (this.markIndex === currentMarks.length - 1) {
-                if (this.noodeIndex === this.results.length - 1) {
-                    this.noodeIndex = 0;
+                if (this.nodeIndex === this.results.length - 1) {
+                    this.nodeIndex = 0;
                     this.globalMarkIndex = 0;
                 }
                 else {
-                    this.noodeIndex++;
+                    this.nodeIndex++;
                     this.globalMarkIndex++;
                 }
 
@@ -163,7 +163,7 @@ export default class NoodelSearch {
     }
 
     /**
-     * Change focus to the previous mark. Will jump to the noode containing the mark if it's not already in focus.
+     * Change focus to the previous mark. Will jump to the node containing the mark if it's not already in focus.
      */
     prev() {
         if (this.results.length === 0) {
@@ -172,25 +172,25 @@ export default class NoodelSearch {
 
         if (this.globalMarkIndex === null) {
             this.globalMarkIndex = this.markCount - 1;
-            this.noodeIndex = this.results.length - 1;
-            this.markIndex = this.results[this.noodeIndex].marks.length - 1;
+            this.nodeIndex = this.results.length - 1;
+            this.markIndex = this.results[this.nodeIndex].marks.length - 1;
         }
         else {
-            let currentMarks = this.results[this.noodeIndex].marks;
+            let currentMarks = this.results[this.nodeIndex].marks;
 
             currentMarks[this.markIndex].classList.remove(this.focalMarkClass);
 
             if (this.markIndex === 0) {
-                if (this.noodeIndex === 0) {
-                    this.noodeIndex = this.results.length - 1;
+                if (this.nodeIndex === 0) {
+                    this.nodeIndex = this.results.length - 1;
                     this.globalMarkIndex = this.markCount - 1;
                 }
                 else {
-                    this.noodeIndex--;
+                    this.nodeIndex--;
                     this.globalMarkIndex--;
                 }
 
-                this.markIndex = this.results[this.noodeIndex].marks.length - 1;
+                this.markIndex = this.results[this.nodeIndex].marks.length - 1;
             }
             else {
                 this.markIndex--;
@@ -207,7 +207,7 @@ export default class NoodelSearch {
      */
     clear(cb?: () => any) {
         this.markIndex = null;
-        this.noodeIndex = null;
+        this.nodeIndex = null;
         this.globalMarkIndex = null;
         this.markCount = 0;
 
