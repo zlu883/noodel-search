@@ -33,6 +33,6 @@
         "webpack-cli": "^3.3.12"
     },
     "peerDependencies": {
-        "noodel": "^2.2.0"
+        "noodel": "^3.0.0"
     }
 }
